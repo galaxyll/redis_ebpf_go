@@ -120,4 +120,6 @@ func Duration(cmd string, seconds int64) {
 	pm.Start()
 	time.Sleep(time.Duration(seconds) * time.Second)
 	pm.Stop()
+
+	bccMode.Close()
 }
