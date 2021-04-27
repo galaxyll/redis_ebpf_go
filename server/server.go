@@ -36,7 +36,8 @@ func main() {
 			return
 		}
 		fmt.Println("the parm after deal: ", cmd, " ", seconds)
-		plug.Duration(cmd, seconds)
+		w.Write([]byte(fmt.Sprintf("plug is start,will last %d seconds\n", seconds)))
+		go plug.Duration(cmd, seconds)
 	})
 
 	fmt.Println("Server start...")
