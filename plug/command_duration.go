@@ -41,22 +41,27 @@ func Duration(cmd string, seconds int64) {
 	// 	panic("argument --binary must be specified")
 	// }
 	bccMode := bcc.NewModule(bpf.Bpf_source, []string{})
+	defer bccMode.Close()
 	uprobeFD, err := bccMode.LoadUprobe("trace_start_time")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	err = bccMode.AttachUprobe(binaryProg, COMMAND[cmd], uprobeFD, -1)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	uretprobeFD, err := bccMode.LoadUprobe("send_duration")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	err = bccMode.AttachUretprobe(binaryProg, COMMAND[cmd], uretprobeFD, -1)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	table := bcc.NewTable(bccMode.TableId("duration_events"), bccMode)
@@ -64,7 +69,8 @@ func Duration(cmd string, seconds int64) {
 
 	pm, err := bcc.InitPerfMap(table, ch, nil)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	intCh := make(chan os.Signal, 1)
@@ -121,5 +127,4 @@ func Duration(cmd string, seconds int64) {
 	time.Sleep(time.Duration(seconds) * time.Second)
 	pm.Stop()
 
-	bccMode.Close()
 }
