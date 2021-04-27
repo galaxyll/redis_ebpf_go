@@ -35,7 +35,7 @@ var binaryProg string = "/usr/local/bin/redis-server"
 // 	flag.StringVar(&binaryProg, "binary", "", "the binary to probe")
 // }
 
-func Duration(cmd string, seconds int64) {
+func Duration(cmd string, seconds int64) error {
 	// flag.Parse()
 	// if len(binaryProg) == 0 {
 	// 	panic("argument --binary must be specified")
@@ -45,23 +45,23 @@ func Duration(cmd string, seconds int64) {
 	uprobeFD, err := bccMode.LoadUprobe("trace_start_time")
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	err = bccMode.AttachUprobe(binaryProg, COMMAND[cmd], uprobeFD, -1)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	uretprobeFD, err := bccMode.LoadUprobe("send_duration")
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	err = bccMode.AttachUretprobe(binaryProg, COMMAND[cmd], uretprobeFD, -1)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	table := bcc.NewTable(bccMode.TableId("duration_events"), bccMode)
@@ -70,7 +70,7 @@ func Duration(cmd string, seconds int64) {
 	pm, err := bcc.InitPerfMap(table, ch, nil)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	intCh := make(chan os.Signal, 1)
@@ -97,7 +97,6 @@ func Duration(cmd string, seconds int64) {
 				fmt.Printf("faild to parse receive data: %s\n", err)
 				continue
 			}
-			fmt.Println(event.Start_time_ns)
 			err = binary.Read(bf, binary.LittleEndian, &event.Duration)
 			if err != nil {
 				fmt.Printf("faild to parse receive data: %s\n", err)
@@ -109,7 +108,6 @@ func Duration(cmd string, seconds int64) {
 				fmt.Printf("faild to parse receive data: %s\n", err)
 				continue
 			}
-			fmt.Println(event.Klen)
 			key := make([]byte, 128)
 			err = binary.Read(bf, binary.LittleEndian, key)
 			if err != nil {
@@ -118,8 +116,7 @@ func Duration(cmd string, seconds int64) {
 			}
 			copy(event.Key[:], key)
 			db.Insert(event)
-			fmt.Println(string(key))
-			fmt.Println(event)
+			fmt.Printf("[log] Key:%s duration:%d\n", event.Key, event.Duration)
 		}
 	}()
 
@@ -127,4 +124,5 @@ func Duration(cmd string, seconds int64) {
 	time.Sleep(time.Duration(seconds) * time.Second)
 	pm.Stop()
 
+	return nil
 }
