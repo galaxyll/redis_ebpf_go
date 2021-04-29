@@ -9,27 +9,28 @@ import (
 	"time"
 
 	"github.com/galaxyll/redis_ebpf_go/bpf"
+	"github.com/galaxyll/redis_ebpf_go/config"
 	"github.com/galaxyll/redis_ebpf_go/db"
 	ent "github.com/galaxyll/redis_ebpf_go/event"
 	"github.com/iovisor/gobpf/bcc"
 )
 
 var COMMAND = map[string]string{
-	"GET":   "lookupKeyReadOrReply",
-	"SET":   "setKey",
-	"INCR":  "incrDecrCommand",
-	"DECR":  "incrDecrCommand",
-	"LPUSH": "pushGenericCommand",
-	"RPUSH": "pushGenericCommand",
-	"LPOP":  "popGenericCommand",
-	"RPOP":  "popGenericCommand",
-	"SADD":  "saddCommand",
-	"HSET":  "hsetCommand",
-	"SPOP":  "spopCommand",
-	"MSET":  "msetGenericCommand",
+	"GET":   config.Conf.PlugConf.Get,
+	"SET":   config.Conf.PlugConf.Set,
+	"INCR":  config.Conf.PlugConf.Incr,
+	"DECR":  config.Conf.PlugConf.Decr,
+	"LPUSH": config.Conf.PlugConf.Lpush,
+	"RPUSH": config.Conf.PlugConf.Rpush,
+	"LPOP":  config.Conf.PlugConf.Lpop,
+	"RPOP":  config.Conf.PlugConf.Rpop,
+	"SADD":  config.Conf.PlugConf.Sadd,
+	"HSET":  config.Conf.PlugConf.Hset,
+	"SPOP":  config.Conf.PlugConf.Spop,
+	"MSET":  config.Conf.PlugConf.Mset,
 }
 
-var binaryProg string = "/usr/local/bin/redis-server"
+var binaryProg string = config.Conf.PlugConf.BinaryPath
 
 // func init() {
 // 	flag.StringVar(&binaryProg, "binary", "", "the binary to probe")

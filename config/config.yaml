@@ -1,0 +1,26 @@
+server:
+  addr: ":9090"
+  grafana: http://39.104.13.134:3000/d/JjSrk29Mk/redis?orgId=1
+influxdb:
+  addr: http://localhost:8086
+  username: nacl
+  password: "170607"
+  database: redis_info
+  precision: ns
+  tag:
+    host: "39.104.13.134"
+    service: duration
+plug:
+  binarypath: /usr/local/bin/redis-server
+  get: lookupKeyReadOrReply
+  set: setKey
+  incr: incrDecrCommand
+  decr: incrDecrCommand
+  lpush: pushGenericCommand
+  rpush: pushGenericCommand
+  lpop: popGenericCommand
+  rpop: popGenericCommand
+  sadd: saddCommand
+  hset: hsetCommand
+  spop: spopCommand
+  mset: msetGenericCommand

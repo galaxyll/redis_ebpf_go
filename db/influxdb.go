@@ -3,13 +3,14 @@ package db
 import (
 	"fmt"
 
+	"github.com/galaxyll/redis_ebpf_go/config"
 	"github.com/galaxyll/redis_ebpf_go/event"
 	client "github.com/influxdata/influxdb1-client/v2"
 )
 
 func NewClient() client.Client {
 	cli, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     "http://localhost:8086",
+		Addr:     "",
 		Username: "nacl",
 		Password: "170607",
 	})
@@ -25,12 +26,12 @@ func Insert(event event.GetEvent) {
 	defer c.Close()
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "redis_info",
-		Precision: "ns",
+		Database:  config.Conf.InfluxdbConf.Database,
+		Precision: config.Conf.InfluxdbConf.Precision,
 	})
 	tags := map[string]string{
-		"host":    "39.104.13.134",
-		"service": "duration",
+		"host":    config.Conf.InfluxdbConf.Tag.Host,
+		"service": config.Conf.InfluxdbConf.Tag.Service,
 	}
 	fileds := map[string]interface{}{}
 	fileds["pid"] = int64(event.Pid)

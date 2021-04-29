@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/galaxyll/redis_ebpf_go/config"
 	"github.com/galaxyll/redis_ebpf_go/plug"
 )
 
 func main() {
-	addr := ":9090"
+	addr := config.Conf.ServerConf.Addr
+	log.Printf("addr %s", addr)
 
 	http.HandleFunc("/duration", func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet {
@@ -37,7 +40,7 @@ func main() {
 		}
 		fmt.Println("the parm after deal: ", cmd, " ", seconds)
 		go plug.Duration(cmd, seconds)
-		http.Redirect(w, req, "http://39.104.13.134:3000/d/JjSrk29Mk/redis?orgId=1", http.StatusTemporaryRedirect)
+		http.Redirect(w, req, "", http.StatusTemporaryRedirect)
 	})
 
 	fmt.Println("Server start...")
