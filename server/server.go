@@ -36,8 +36,10 @@ func main() {
 			return
 		}
 		fmt.Println("the parm after deal: ", cmd, " ", seconds)
-		w.Write([]byte(fmt.Sprintf("plug is start,will last %d seconds\n", seconds)))
+		//w.Write([]byte(fmt.Sprintf("plug is start,will last %d seconds\n", seconds)))
 		go plug.Duration(cmd, seconds)
+		http.Redirect(w, req, "http://39.104.13.134:3000/d/JjSrk29Mk/redis?orgId=1", http.StatusTemporaryRedirect)
+		// http.NewRequest
 	})
 
 	fmt.Println("Server start...")
