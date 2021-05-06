@@ -15,21 +15,6 @@ import (
 	"github.com/iovisor/gobpf/bcc"
 )
 
-var COMMAND = map[string]string{
-	"GET":   config.Conf.PlugConf.Get,
-	"SET":   config.Conf.PlugConf.Set,
-	"INCR":  config.Conf.PlugConf.Incr,
-	"DECR":  config.Conf.PlugConf.Decr,
-	"LPUSH": config.Conf.PlugConf.Lpush,
-	"RPUSH": config.Conf.PlugConf.Rpush,
-	"LPOP":  config.Conf.PlugConf.Lpop,
-	"RPOP":  config.Conf.PlugConf.Rpop,
-	"SADD":  config.Conf.PlugConf.Sadd,
-	"HSET":  config.Conf.PlugConf.Hset,
-	"SPOP":  config.Conf.PlugConf.Spop,
-	"MSET":  config.Conf.PlugConf.Mset,
-}
-
 var binaryProg string = config.Conf.PlugConf.BinaryPath
 
 // func init() {
@@ -41,14 +26,15 @@ func Duration(cmd string, seconds int64) error {
 	// if len(binaryProg) == 0 {
 	// 	panic("argument --binary must be specified")
 	// }
-	bccMode := bcc.NewModule(bpf.Bpf_source, []string{})
+	bccMode := bcc.NewModule(bpf.Get_src, []string{})
 	defer bccMode.Close()
 	uprobeFD, err := bccMode.LoadUprobe("trace_start_time")
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	err = bccMode.AttachUprobe(binaryProg, COMMAND[cmd], uprobeFD, -1)
+	fmt.Printf("/%s/\n", config.COMMAND[cmd])
+	err = bccMode.AttachUprobe(binaryProg, config.COMMAND[cmd], uprobeFD, -1)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -59,7 +45,7 @@ func Duration(cmd string, seconds int64) error {
 		fmt.Println(err)
 		return err
 	}
-	err = bccMode.AttachUretprobe(binaryProg, COMMAND[cmd], uretprobeFD, -1)
+	err = bccMode.AttachUretprobe(binaryProg, config.COMMAND[cmd], uretprobeFD, -1)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -116,7 +102,7 @@ func Duration(cmd string, seconds int64) error {
 				continue
 			}
 			copy(event.Key[:], key)
-			db.Insert(event)
+			db.InsertGetEv(event)
 			fmt.Printf("[log] Key:%s duration:%d\n", event.Key, event.Duration)
 		}
 	}()

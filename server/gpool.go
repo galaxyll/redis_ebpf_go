@@ -5,7 +5,11 @@ type Task struct {
 }
 
 func NewTask(f func() error) *Task {
-	return &Task{f}
+	t := Task{
+		f: f,
+	}
+
+	return &t
 }
 
 func (t *Task) Execute() {
@@ -13,15 +17,39 @@ func (t *Task) Execute() {
 }
 
 type Pool struct {
-	EntryTaskPool chan *Task
-	worker_num    int
-	JobsChannel   chan *Task
+	EntryChannel chan *Task
+
+	worker_num int
+
+	JobsChannel chan *Task
 }
 
 func NewPool(cap int) *Pool {
-	return &Pool{
-		EntryTaskPool: make(chan *Task),
-		worker_num:    cap,
-		JobsChannel:   make(chan *Task),
+	p := Pool{
+		EntryChannel: make(chan *Task),
+		worker_num:   cap,
+		JobsChannel:  make(chan *Task),
 	}
+
+	return &p
+}
+
+func (p *Pool) worker(work_ID int) {
+	for task := range p.JobsChannel {
+		task.Execute()
+	}
+}
+
+func (p *Pool) Run() {
+	for i := 0; i < p.worker_num; i++ {
+		go p.worker(i)
+	}
+
+	for task := range p.EntryChannel {
+		p.JobsChannel <- task
+	}
+
+	close(p.JobsChannel)
+
+	close(p.EntryChannel)
 }

@@ -40,7 +40,7 @@ func main() {
 		}
 		fmt.Println("the parm after deal: ", cmd, " ", seconds)
 		go plug.Duration(cmd, seconds)
-		http.Redirect(w, req, "", http.StatusTemporaryRedirect)
+		http.Redirect(w, req, config.Conf.ServerConf.Grafana, http.StatusTemporaryRedirect)
 	})
 
 	fmt.Println("Server start...")
@@ -52,7 +52,7 @@ func main() {
 }
 
 func in(target string) bool {
-	for key := range plug.COMMAND {
+	for key := range config.COMMAND {
 		if key == target {
 			return true
 		}

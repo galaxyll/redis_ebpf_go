@@ -1,6 +1,6 @@
 package bpf
 
-var Bpf_source = `
+var Get_src = `
 #include <uapi/linux/ptrace.h>
 
 #define LRU_BITS 24

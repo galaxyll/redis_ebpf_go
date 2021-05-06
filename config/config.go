@@ -49,6 +49,7 @@ type Config struct {
 }
 
 var Conf Config
+var COMMAND map[string]string
 
 func init() {
 	bytes, err := ioutil.ReadFile("/home/nacl/redis_ebpf_go/config/config.yaml")
@@ -58,5 +59,19 @@ func init() {
 	err = yaml.Unmarshal(bytes, &Conf)
 	if err != nil {
 		log.Fatalf("faild tp parse config.yaml: %s\n", err)
+	}
+	COMMAND = map[string]string{
+		"GET":   Conf.PlugConf.Get,
+		"SET":   Conf.PlugConf.Set,
+		"INCR":  Conf.PlugConf.Incr,
+		"DECR":  Conf.PlugConf.Decr,
+		"LPUSH": Conf.PlugConf.Lpush,
+		"RPUSH": Conf.PlugConf.Rpush,
+		"LPOP":  Conf.PlugConf.Lpop,
+		"RPOP":  Conf.PlugConf.Rpop,
+		"SADD":  Conf.PlugConf.Sadd,
+		"HSET":  Conf.PlugConf.Hset,
+		"SPOP":  Conf.PlugConf.Spop,
+		"MSET":  Conf.PlugConf.Mset,
 	}
 }

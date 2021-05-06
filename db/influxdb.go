@@ -10,9 +10,9 @@ import (
 
 func NewClient() client.Client {
 	cli, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     "",
-		Username: "nacl",
-		Password: "170607",
+		Addr:     config.Conf.InfluxdbConf.Addr,
+		Username: config.Conf.InfluxdbConf.Username,
+		Password: config.Conf.InfluxdbConf.Password,
 	})
 
 	if err != nil {
@@ -21,7 +21,7 @@ func NewClient() client.Client {
 	return cli
 }
 
-func Insert(event event.GetEvent) {
+func insert(event event.GetEvent, tb string) error {
 	c := NewClient()
 	defer c.Close()
 
@@ -37,15 +37,34 @@ func Insert(event event.GetEvent) {
 	fileds["pid"] = int64(event.Pid)
 	fileds["duration"] = int64(event.Duration)
 	fileds["key"] = string(event.Key[:event.Klen])
-	fileds["klen"] = int32(event.Klen)
+	fileds["klen"] = int32(event.Klen - 1)
 	//	pt, err := client.NewPoint("duration_info", tags, fileds, time.Unix(0, int64(event.Start_time_ns)))
-	pt, err := client.NewPoint("duration_info", tags, fileds)
+	pt, err := client.NewPoint(tb, tags, fileds)
 	if err != nil {
 		fmt.Println("insert point to influxdb faild: ", err)
+		return err
 	}
 	bp.AddPoint(pt)
 	err = c.Write(bp)
 	if err != nil {
 		fmt.Println("write db faild: ", err)
+		return err
 	}
+	return nil
+}
+
+func InsertGetEv(event event.GetEvent) error {
+	err := insert(event, "get")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InsertSetEv(event event.GetEvent) error {
+	err := insert(event, "set")
+	if err != nil {
+		return err
+	}
+	return nil
 }

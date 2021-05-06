@@ -13,7 +13,7 @@ influxdb:
 plug:
   binarypath: /usr/local/bin/redis-server
   get: lookupKeyReadOrReply
-  set: setKey
+  set: setGenericCommand
   incr: incrDecrCommand
   decr: incrDecrCommand
   lpush: pushGenericCommand
