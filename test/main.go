@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
-
-func main() {
-	fmt.Println(os.Getenv("INFLUX_USER"))
-}
+// func main() {
+// 	fmt.Println(os.Getenv("INFLUX_USER"))
+// 	ExampleClient()
+// }

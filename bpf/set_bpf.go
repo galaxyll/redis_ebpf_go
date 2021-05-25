@@ -19,7 +19,7 @@ int trace_start(struct pt_regs* ctx){
     u64 pid = bpf_get_current_pid_tgid();
     u64 start_time_ns = bpf_ktime_get_ns();
     
-    robj* rObj = (robj*)PT_REGS_PARM2(ctx);
+    robj* rObj = (robj*)PT_REGS_PARM3(ctx);
 
     set_event_t event = {
         .pid = pid>>32,

@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/galaxyll/redis_ebpf_go/bpf"
 	"github.com/galaxyll/redis_ebpf_go/config"
 	"github.com/galaxyll/redis_ebpf_go/db"
 	ent "github.com/galaxyll/redis_ebpf_go/event"
+	"github.com/galaxyll/redis_ebpf_go/lfu"
 	"github.com/iovisor/gobpf/bcc"
 )
 
@@ -65,6 +68,7 @@ func Duration(cmd string, seconds int64) error {
 
 	go func() {
 		var event ent.GetEvent
+		lfucache := lfu.Constructor(10)
 		for {
 			data := <-ch
 			bf := bytes.NewBuffer(data)
@@ -103,7 +107,18 @@ func Duration(cmd string, seconds int64) error {
 			}
 			copy(event.Key[:], key)
 			db.InsertGetEv(event)
-			fmt.Printf("[log] Key:%s duration:%d\n", event.Key, event.Duration)
+			//fmt.Printf("[log] Key:%s duration:%d\n", event.Key, event.Duration)
+			lfucache.Put(string(event.Key[:event.Klen-1]), 0)
+			var sb bytes.Buffer
+			for k := range lfucache.Cache {
+				freq := strconv.Itoa(lfucache.Cache[k].Freq)
+				sb.WriteString(k + ":" + freq + "\n")
+			}
+			err = ioutil.WriteFile("hotkey.txt", sb.Bytes(), 0666)
+			if err != nil {
+				fmt.Print(err)
+			}
+
 		}
 	}()
 
